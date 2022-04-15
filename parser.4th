@@ -2,6 +2,7 @@
 \ (c)copyright 2022 by Gerald Wodni <gerald.wodni@gmail.com>
 
 variable line-open
+variable post-invert
 
 : || ( -- )
 \ *G treat the rest of the line as comment
@@ -25,11 +26,17 @@ variable line-open
         abort" Line already closed, possible missplaced '-||' or '-+'"
     then ;
 
-: -| ; ( f -- f )
-\ *G Start input expression, must be closed with '|-'.
+: -| ( f -- f )
+\ *G Start input expression, must be closed with '|-' or '/|-'.
 \ ** The expression can assume one flag on the stack.
 \ ** The expression itself must put an extra flag on the stack.
 \ *E Example: -| I1 |-
+    post-invert off ;
+
+: -|/ ( f -- f)
+\ *G Like '-|', but instructs closing counterpart to invert.
+\ *P Must be closed by '|-'.
+    post-invert on ;
 
 \ *S And-parsing
 \ *P Logical ands always reside on the same line,
@@ -39,11 +46,18 @@ variable line-open
 \ *G invert f2 and perform a logical and with f1
     invert and ;
 
-Synonym  |- and ( f1 f2 -- f3 )
+: |- ( f1 f2 -- f3 )
 \ *G graphical end of input expression synonym for \see{and}
+    post-invert @ if invert then
+    and ;
 
-Synonym /|- andc ( f1 f2 -- f3 )
+: /|- ( f1 f2 -- f3 )
 \ *G graphical end of inverted input expression synonym for \see{andc}
+    post-invert @ if
+        abort" Cannot use '/|-' when starting with '-|/': too much inverting"
+    else
+        andc
+    then ;
 
 Synonym -( dup ( f -- f f )
 \ *G graphical start of output synonym

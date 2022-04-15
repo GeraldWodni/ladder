@@ -22,7 +22,7 @@ variable line-open
         drop
         line-open off
     else
-        abort" Line already closed, possible missplaced '-||'"
+        abort" Line already closed, possible missplaced '-||' or '-+'"
     then ;
 
 : -| ; ( f -- f )
@@ -31,6 +31,9 @@ variable line-open
 \ ** The expression itself must put an extra flag on the stack.
 \ *E Example: -| I1 |-
 
+\ *S And-parsing
+\ *P Logical ands always reside on the same line,
+\ ** therfor parsing them is trivial
 
 : andc ( f1 f2 -- f3 )
 \ *G invert f2 and perform a logical and with f1
@@ -47,4 +50,20 @@ Synonym -( dup ( f -- f f )
 
 : )- ; ( f -- f )
 \ *G graphical end of output synonym (expected one flag to be left on the stack)
+
+
+\ *S Or-parsing
+\ *P Logical ors are on different lines.
+\ ** To avoid temporary variables the final outputs are at the bottom line.
+
+: -+ ( f -- f )
+\ *G End line and leave flag for consumation by following lines
+    line-open @ if
+        line-open off
+    else
+        abort" Line already closed, possible missplaced '-+' or '-||'"
+    then ;
+
+Synonym -+- or ( f1 f2 -- f3 )
+\ *G graphical join lines synonym
 
